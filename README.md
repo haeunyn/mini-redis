@@ -135,3 +135,21 @@ TTL 테스트에서 실제로 기다리지 않는 이유는 `Store` 가 시계 �
 
 파이썬 `list` 는 "고정 길이 배열 + 인덱스 접근" 수준으로만 사용했고
 (`[None] * capacity` 생성 후 `arr[i]` 접근), 확장 로직은 직접 구현했습니다.
+
+### 제약 준수를 기계로 검증하기
+
+```bash
+./run.sh check
+```
+
+```
+검사 대상: miniredis/ 의 파이썬 파일 14개
+금지 항목: dict, set, frozenset, collections, {} 리터럴/컴프리헨션
+  위반 없음
+✅ dict / set / collections 를 전혀 사용하지 않았습니다.
+```
+
+`grep` 으로는 정확히 검사할 수 없습니다. `self.store.set(...)` 은 직접 만든
+메서드 호출이지 내장 `set()` 이 아닌데, 문자열 검색은 둘을 구분하지 못하기
+때문입니다. 그래서 `tools/check_constraints.py` 는 파이썬 `ast` 모듈로
+**구문 트리를 읽어서** 이름 노드(`Name`)와 속성 노드(`Attribute`)를 구분합니다.

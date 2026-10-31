@@ -1,0 +1,39 @@
+# ── 1. 메모리 한도를 걸고 LRU 자동 제거 확인 (과제 명세 예시) ──
+CONFIG SET maxmemory 30
+SET user:1 "Alice"
+SET user:2 "Bob"
+SET user:3 "Charlie"
+# maxmemory(30) 초과 → 가장 오래 안 쓴 user:1 이 제거된다
+GET user:1
+INFO memory
+KEYS
+# ── 2. GET 이 LRU 순서를 바꾼다 ──
+CONFIG SET maxmemory 0
+SET a "1"
+SET b "2"
+GET a
+# 이제 a 가 최신, b 가 가장 오래됨
+# ── 3. TTL ──
+EXPIRE b 100
+TTL b
+TTL a
+TTL 없는키
+EXPIRE 없는키 10
+# ── 4. SET 으로 덮어쓰면 TTL 이 초기화된다 ──
+SET b "새값"
+TTL b
+# ── 5. 기본 명령어 ──
+DBSIZE
+EXISTS a
+DEL a
+EXISTS a
+DBSIZE
+# ── 6. 에러 표준 ──
+HELLO
+GET
+CONFIG SET maxmemory abc
+# ── 7. 보너스: Pub/Sub ──
+SUBSCRIBE news
+PUBLISH news "하은님 안녕하세요"
+UNSUBSCRIBE news
+PUBLISH news "이제 안 옵니다"
